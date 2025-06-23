@@ -1,0 +1,66 @@
+﻿@page "/upload"
+@inject HttpClient Http
+
+<h3>Upload Photos</h3>
+
+<InputFile OnChange="HandleSelected" multiple />
+<button class="btn btn-primary mt-2" @onclick="UploadFiles" disabled="@(!files?.Any() ?? true)">Upload</button>
+
+
+@if (uploadResults.Count > 0)
+{
+    <h5 class="mt-3">Results:</h5>
+    <ul>
+        @foreach (var result in uploadResults)
+        {
+            <li>@result</li>
+        }
+    </ul>
+}
+
+@code {
+    private IReadOnlyList<IBrowserFile>? files;
+    private List<string> uploadResults = new();
+
+
+    private void HandleSelected(InputFileChangeEventArgs e)
+    {
+        files = e.GetMultipleFiles();
+        uploadResults.Clear();
+        StateHasChanged(); 
+    }
+
+
+    private async Task UploadFiles()
+    {
+        if (files is null) return;
+
+        foreach (var file in files)
+        {
+            var content = new MultipartFormDataContent();
+            var streamContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)); // Max 10MB
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(streamContent, "file", file.Name);
+
+            try
+            {
+                var response = await Http.PostAsync("http://localhost:5235/api/upload", content);
+                var responseText = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    uploadResults.Add($"✅ {file.Name} uploaded successfully: {responseText}");
+                }
+                else
+                {
+                    uploadResults.Add($"❌ {file.Name} failed: {responseText}");
+                }
+            }
+            catch (Exception ex)
+            {
+                uploadResults.Add($"❌ {file.Name} failed: {ex.Message}");
+            }
+        }
+    }
+}

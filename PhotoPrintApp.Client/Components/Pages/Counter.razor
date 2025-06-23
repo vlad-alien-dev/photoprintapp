@@ -1,0 +1,87 @@
+﻿@page "/counter"
+@inject HttpClient Http
+
+@rendermode InteractiveServer
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<InputFile OnChange="HandleSelected" multiple />
+<button class="btn btn-primary mt-2" @onclick="UploadFiles" disabled="@(!files?.Any() ?? true)">Upload</button>
+
+
+@if (uploadResults.Count > 0)
+{
+    <h5 class="mt-3">Results:</h5>
+    <ul>
+        @foreach (var result in uploadResults)
+        {
+            <li>@result</li>
+        }
+    </ul>
+}
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+    private IReadOnlyList<IBrowserFile>? files;
+    private List<string> uploadResults = new();
+
+
+    private void HandleSelected(InputFileChangeEventArgs e)
+    {
+        files = e.GetMultipleFiles(maximumFileCount:500);
+        uploadResults.Clear();
+        StateHasChanged();
+    }
+
+
+    private async Task UploadFiles()
+    {
+        if (files is null) return;
+
+        var batchSize = 50;
+        var fileList = files.ToList();
+
+        for (int i = 0; i < fileList.Count; i += batchSize)
+        {
+            var batch = fileList.Skip(i).Take(batchSize).ToList();
+            await UploadBatch(batch);
+            await Task.Delay(500); // Give Blazor time to recover
+        }
+    }
+
+    private async Task UploadBatch(List<IBrowserFile> batch)
+    {
+        foreach (var file in batch)
+        {
+            try
+            {
+                var content = new MultipartFormDataContent();
+                var stream = file.OpenReadStream(20 * 1024 * 1024); // 20 MB limit
+                content.Add(new StreamContent(stream), "file", file.Name);
+
+                var response = await Http.PostAsync("http://localhost:5268/api/upload", content);
+                var result = await response.Content.ReadAsStringAsync();
+
+                uploadResults.Add(response.IsSuccessStatusCode
+                    ? $"✅ {file.Name} uploaded successfully."
+                    : $"❌ {file.Name} failed: {result}");
+            }
+            catch (Exception ex)
+            {
+                uploadResults.Add($"❌ {file.Name} failed: {ex.Message}");
+            }
+        }
+    }
+
+}
