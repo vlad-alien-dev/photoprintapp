@@ -5,15 +5,27 @@
 
 <PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
+<h1>Upload photos</h1>
 
-<p role="status">Current count: @currentCount</p>
+@* <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button> *@
 
 <InputFile OnChange="HandleSelected" multiple />
-<button class="btn btn-primary mt-2" @onclick="UploadFiles" disabled="@(!files?.Any() ?? true)">Upload</button>
-
+@* <button class="btn btn-primary mt-2" @onclick="UploadFiles" disabled="@(!files?.Any() ?? true)">Upload</button> *@
+<button class="btn btn-primary mt-2"
+        @onclick="UploadFiles"
+        disabled="@((!files?.Any() ?? true )|| isUploading)">
+    @if (isUploading)
+    {
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Uploading...</span>
+    }
+    else
+    {
+        <span>Upload</span>
+    }
+</button>
 
 @if (uploadResults.Count > 0)
 {
@@ -33,13 +45,15 @@
     {
         currentCount++;
     }
+    private bool isUploading = false;
+
     private IReadOnlyList<IBrowserFile>? files;
     private List<string> uploadResults = new();
 
 
     private void HandleSelected(InputFileChangeEventArgs e)
     {
-        files = e.GetMultipleFiles(maximumFileCount:500);
+        files = e.GetMultipleFiles(maximumFileCount: 500);
         uploadResults.Clear();
         StateHasChanged();
     }
@@ -48,6 +62,10 @@
     private async Task UploadFiles()
     {
         if (files is null) return;
+
+        isUploading = true;
+        uploadResults.Clear(); // optional: clear results on new upload
+        StateHasChanged(); // update UI immediately
 
         var batchSize = 50;
         var fileList = files.ToList();
@@ -58,6 +76,9 @@
             await UploadBatch(batch);
             await Task.Delay(500); // Give Blazor time to recover
         }
+
+        isUploading = false;
+        StateHasChanged();
     }
 
     private async Task UploadBatch(List<IBrowserFile> batch)
@@ -70,7 +91,8 @@
                 var stream = file.OpenReadStream(20 * 1024 * 1024); // 20 MB limit
                 content.Add(new StreamContent(stream), "file", file.Name);
 
-                var response = await Http.PostAsync("http://localhost:5268/api/upload", content);
+                var response = await Http.PostAsync("https://photoprintapi.azurewebsites.net//api/upload", content);
+                //var response = await Http.PostAsync("http://localhost:5268/api/upload", content);
                 var result = await response.Content.ReadAsStringAsync();
 
                 uploadResults.Add(response.IsSuccessStatusCode

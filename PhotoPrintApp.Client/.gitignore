@@ -1,0 +1,91 @@
+## Ignore Visual Studio temporary files, build results, and
+## user-specific files
+
+# Build Results
+bin/
+obj/
+out/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider settings
+.idea/
+
+# VS Code settings
+.vscode/
+
+# Dotnet CLI
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# DotCover
+*.dotCover
+
+# Coverage results
+coverage/
+*.lcov
+
+# Azure Web Apps publish settings
+PublishProfiles/
+
+# Logs
+*.log
+logs/
+
+# Database local files
+*.mdf
+*.ldf
+*.sqlite
+
+# Others
+*.db
+*.pdb
+*.cache
+*.tmp
+
+# NuGet
+*.nupkg
+.nuget/
+packages/
+*.snupkg
+
+# Backup & temporary files
+*.bak
+*.tmp
+*.old
+*.orig
+*.swp
+
+# Azure Pipelines artifacts
+.azure-pipelines/
+
+# Ignore secrets
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+
+# Ignore environment-dependent files
+.env
+.env.*
+
+# Node modules (if frontend exists)
+node_modules/
+
+# wwwroot-generated
+wwwroot/dist/
+wwwroot/lib/
+
+# JetBrains Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
