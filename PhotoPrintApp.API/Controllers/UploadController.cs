@@ -18,7 +18,7 @@ public class UploadController : ControllerBase
     }
 
     [HttpPost]
-    [RequestSizeLimit(20_000_000_000)]
+    [RequestSizeLimit(50_000_000_000)]
     public async Task<IActionResult> UploadPhoto([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
