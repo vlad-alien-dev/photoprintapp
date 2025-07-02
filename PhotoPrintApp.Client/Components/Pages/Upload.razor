@@ -1,15 +1,11 @@
-﻿@page "/counter"
+﻿@page "/upload"
 @inject HttpClient Http
 
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Upload</PageTitle>
 
 <h1>Upload photos</h1>
-
-@* <p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button> *@
 
 <InputFile OnChange="HandleSelected" multiple />
 @* <button class="btn btn-primary mt-2" @onclick="UploadFiles" disabled="@(!files?.Any() ?? true)">Upload</button> *@
@@ -39,12 +35,7 @@
 }
 
 @code {
-    private int currentCount = 0;
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
     private bool isUploading = false;
 
     private IReadOnlyList<IBrowserFile>? files;
