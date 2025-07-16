@@ -25,7 +25,7 @@ public class UploadController : ControllerBase
             return BadRequest("No file uploaded");
 
         var connectionString = _config.GetConnectionString("BlobStorage");
-        var container = new BlobContainerClient(connectionString, "uploads");
+        var container = new BlobContainerClient(connectionString, "pending-uploads");
         await container.CreateIfNotExistsAsync(PublicAccessType.None);
 
         var blob = container.GetBlobClient($"{Guid.NewGuid()}_{file.FileName}");
